@@ -1,0 +1,25 @@
+Kotoba Check — license information
+==================================
+
+Project source code and documentation:
+  /LICENSE.txt
+  MIT License, Copyright (c) 2026 Kaito Sugimoto
+
+Lindera 6.0.0:
+  /lindera-LICENSE.txt
+
+Lindera WASM 6.0.0:
+  /lindera-wasm-LICENSE.txt
+  /lindera-wasm-THIRD-PARTY-LICENSES.html
+
+Lindera IPADIC 6.0.0, derived from mecab-ipadic-2.7.0-20070801:
+  /lindera-ipadic/COPYING
+  /lindera-ipadic/NOTICE.txt
+
+textlint-rule-preset-ai-words-ja 1.2.0:
+  /textlint-rule-preset-ai-words-ja-LICENSE.txt
+
+Vite 8.3.0 and its bundled dependencies:
+  /vite-LICENSE.md
+
+The project MIT license does not replace or override these third-party terms.
