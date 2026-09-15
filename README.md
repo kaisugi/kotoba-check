@@ -47,6 +47,6 @@ Cloudflare Pagesの設定は次のとおりです。
 
 このプロジェクト独自のコードと文書は[MIT License](LICENSE)です。第三者コンポーネントはMITへ再許諾せず、それぞれの条件を維持します。
 
-表現ルールは `textlint-rule-preset-ai-words-ja@1.2.0` を移植しています。Lindera、WASM内部のRust依存、表現ルール、IPADIC、Viteのライセンスと告知は[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)および `public/` 配下に同梱しています。特にIPADICは、Lindera配布版の不完全な告知を原版の完全な`COPYING`で補っています。調査結果と更新時の注意事項は[ライセンス監査](docs/license-audit.md)を参照してください。
+表現ルールは `textlint-rule-preset-ai-words-ja@1.2.1` を移植しています。Lindera、WASM内部のRust依存、表現ルール、IPADIC、Viteのライセンスと告知は[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)および `public/` 配下に同梱しています。特にIPADICは、Lindera配布版の不完全な告知を原版の完全な`COPYING`で補っています。調査結果と更新時の注意事項は[ライセンス監査](docs/license-audit.md)を参照してください。
 
 表現辞書と検出方法を公開されたp1ass氏に感謝します。

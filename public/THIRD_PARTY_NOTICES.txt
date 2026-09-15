@@ -16,7 +16,7 @@ Lindera IPADIC 6.0.0, derived from mecab-ipadic-2.7.0-20070801:
   /lindera-ipadic/COPYING
   /lindera-ipadic/NOTICE.txt
 
-textlint-rule-preset-ai-words-ja 1.2.0:
+textlint-rule-preset-ai-words-ja 1.2.1:
   /textlint-rule-preset-ai-words-ja-LICENSE.txt
 
 Vite 8.3.0 and its bundled dependencies:
