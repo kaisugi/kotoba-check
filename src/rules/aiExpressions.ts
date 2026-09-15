@@ -51,7 +51,7 @@ const niAdverbial: TokenCondition = {
 }
 
 /**
- * Ported from textlint-rule-preset-ai-words-ja 1.2.0 (MIT).
+ * Ported from textlint-rule-preset-ai-words-ja 1.2.1 (MIT).
  * The rules intentionally describe expressions, not an authorship score.
  */
 export const aiExpressionRules: readonly ExpressionRule[] = [
@@ -141,6 +141,9 @@ export const aiExpressionRules: readonly ExpressionRule[] = [
     verb('する'),
     { lemma: ['れる', 'られる'], pos: '動詞', posDetail: '接尾' },
   ]),
+  expression('silence', '無言', [noun('無言')]),
+  expression('gate-kanji', '門', [noun('門')]),
+  expression('gate', 'ゲート', [noun('ゲート')]),
 ]
 
 const includes = (expected: string | readonly string[], actual: string): boolean =>
@@ -151,4 +154,3 @@ export const tokenMatches = (condition: TokenCondition, token: Morpheme): boolea
   (condition.lemma === undefined || includes(condition.lemma, token.lemma)) &&
   (condition.pos === undefined || condition.pos === token.pos) &&
   (condition.posDetail === undefined || condition.posDetail === token.posDetail)
-

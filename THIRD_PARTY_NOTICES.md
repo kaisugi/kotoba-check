@@ -25,11 +25,11 @@ The original IPADIC terms expressly permit use, reproduction, modification, and 
 
 The original `dict.words` is byte-for-byte reconstructable by concatenating `dict.words.part-aa`, `dict.words.part-ab`, and `dict.words.part-ac` in that order. It is split only to comply with the hosting file-size limit; no dictionary records are changed.
 
-## textlint-rule-preset-ai-words-ja 1.2.0
+## textlint-rule-preset-ai-words-ja 1.2.1
 
 - Source: https://github.com/p1ass/textlint-rule-preset-ai-words-ja
-- Version: 1.2.0
-- Reviewed revision: `4de09b3467c48519595e941cf460ed4820a7be75`
+- Version: 1.2.1
+- Reviewed revision: `2f47c2a08eb8268271aca8ba94e444a471deb7b8`
 - License: MIT
 - Bundled license: `public/textlint-rule-preset-ai-words-ja-LICENSE.txt`
 

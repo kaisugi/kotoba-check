@@ -1,6 +1,6 @@
 # ライセンス監査
 
-監査日: 2026-09-14
+監査日: 2026-09-15
 
 > この文書は一次資料と配布物に基づく技術的なライセンス監査であり、弁護士による法的助言ではありません。
 
@@ -20,7 +20,7 @@ IPADICのバイナリ辞書を静的サイトから直接配信することは�
 - Lindera v6.0.0 Release: https://github.com/lindera/lindera/releases/tag/v6.0.0
 - Lindera v6.0.0ソースとライセンス: https://github.com/lindera/lindera/tree/v6.0.0
 - `lindera-wasm@6.0.0` npm配布物
-- 移植元 `textlint-rule-preset-ai-words-ja@1.2.0`
+- 移植元 `textlint-rule-preset-ai-words-ja@1.2.1`
 
 MeCab本体のGPL/LGPL/BSDという選択肢と、IPADIC辞書の条件は別物です。公式の開発資料も辞書のライセンスは個々の辞書に従うと説明しています。このアプリはMeCab本体を配布していません。
 

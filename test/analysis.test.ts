@@ -71,7 +71,7 @@ describe('UTF-8 byte offset conversion', () => {
   })
 })
 
-describe('AI expression rules ported from upstream 1.2.0', () => {
+describe('AI expression rules ported from upstream 1.2.1', () => {
   const invalidCases: readonly [string, string][] = [
     ['この設定が効きます。', '効く'],
     ['インデックスが効かない。', '効く'],
@@ -124,6 +124,14 @@ describe('AI expression rules ported from upstream 1.2.0', () => {
     ['定石どおりに実装します。', '定石'],
     ['設定を変えた瞬間に気づきました。', '〜した瞬間'],
     ['警告が静かに無視されます。', '静かに'],
+    ['エラーが無言で握りつぶされます。', '無言'],
+    ['マージ前の門になります。', '門'],
+    ['CI に品質ゲートを置きます。', 'ゲート'],
+    ['ゲート付きの手順にします。', 'ゲート'],
+    ['彼は無言でうなずきました。', '無言'],
+    ['正面の門をくぐります。', '門'],
+    ['空港のゲートに向かいます。', 'ゲート'],
+    ['API ゲートウェイを置きます。', 'ゲート'],
   ]
 
   it.each(invalidCases)('detects %s', (text, expectedLabel) => {
@@ -149,6 +157,8 @@ describe('AI expression rules ported from upstream 1.2.0', () => {
     '既定値を変更します。',
     'その瞬間に気づきました。',
     '静かに話します。',
+    '専門家に聞きます。',
+    '部門をまたいで調整します。',
   ]
 
   it.each(validCases)('does not flag the upstream valid case: %s', (text) => {
@@ -191,4 +201,3 @@ describe('dictionary loading failure', () => {
     ).rejects.toThrow(/辞書ファイル.+取得できませんでした（404）/)
   })
 })
-
