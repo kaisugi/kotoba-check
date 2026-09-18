@@ -1,5 +1,6 @@
 import './style.css'
 import type { Finding, WorkerResponse } from './analysis/types'
+import { aiExpressionRules } from './rules/aiExpressions'
 
 type UiState = 'loading' | 'idle' | 'analyzing' | 'ready' | 'error'
 
@@ -38,6 +39,23 @@ app.innerHTML = `
         </div>
       </div>
     </section>
+
+    <details class="rules-card" id="rules-settings">
+      <summary><span>点検する表現を選ぶ</span><span id="enabled-rule-count" class="rule-count"></span></summary>
+      <div class="rules-content">
+        <p>文脈に合う表現はオフにできます。設定だけをこのブラウザに保存し、文章は保存しません。</p>
+        <div class="rules-toolbar">
+          <label for="rule-search">表現を探す</label>
+          <input id="rule-search" type="search" placeholder="例：検査、部品" autocomplete="off" />
+          <div class="rules-actions">
+            <button id="enable-all-rules" type="button">すべてオン</button>
+            <button id="disable-all-rules" type="button">すべてオフ</button>
+          </div>
+        </div>
+        <div id="rule-list" class="rule-list" role="group" aria-label="表現ルール"></div>
+        <p id="rule-search-empty" class="rule-search-empty" hidden>一致する表現はありません。</p>
+      </div>
+    </details>
 
     <section class="results" aria-labelledby="results-title">
       <div class="section-heading result-heading">
@@ -92,6 +110,29 @@ const status = document.querySelector<HTMLElement>('#status')!
 const checkButton = document.querySelector<HTMLButtonElement>('#check-button')!
 const clearButton = document.querySelector<HTMLButtonElement>('#clear-button')!
 const copyButton = document.querySelector<HTMLButtonElement>('#copy-button')!
+const enabledRuleCount = document.querySelector<HTMLElement>('#enabled-rule-count')!
+const ruleList = document.querySelector<HTMLElement>('#rule-list')!
+const ruleSearch = document.querySelector<HTMLInputElement>('#rule-search')!
+const ruleSearchEmpty = document.querySelector<HTMLElement>('#rule-search-empty')!
+const enableAllRules = document.querySelector<HTMLButtonElement>('#enable-all-rules')!
+const disableAllRules = document.querySelector<HTMLButtonElement>('#disable-all-rules')!
+
+const settingsKey = 'kotoba-check-disabled-rules-v1'
+const knownRuleIds = new Set(aiExpressionRules.map((rule) => rule.id))
+const loadDisabledRules = (): Set<string> => {
+  try {
+    const saved: unknown = JSON.parse(localStorage.getItem(settingsKey) ?? '[]')
+    if (Array.isArray(saved)) {
+      return new Set(saved.filter((id): id is string => typeof id === 'string' && knownRuleIds.has(id)))
+    }
+  } catch { /* Storage may be unavailable; keep in-memory settings. */ }
+  return new Set()
+}
+const disabledRules = loadDisabledRules()
+const saveDisabledRules = (): void => {
+  try { localStorage.setItem(settingsKey, JSON.stringify([...disabledRules])) }
+  catch { /* The controls still work for this page when storage is blocked. */ }
+}
 
 let worker: Worker | undefined
 let workerReady = false
@@ -99,7 +140,80 @@ let requestId = 0
 let debounceTimer: number | undefined
 let isComposing = false
 let lastFindings: Finding[] = []
+let allFindings: Finding[] = []
 let uiState: UiState = 'loading'
+
+const updateRuleCount = (): void => {
+  enabledRuleCount.textContent = `${aiExpressionRules.length - disabledRules.size} / ${aiExpressionRules.length} オン`
+}
+
+const updateReadyStatus = (): void => {
+  if (disabledRules.size === aiExpressionRules.length) {
+    setStatus('ready', '表現ルールがすべてオフです', '点検する表現をオンにしてください')
+  } else {
+    setStatus(
+      'ready',
+      lastFindings.length === 0 ? '指摘はありません' : `${lastFindings.length}件の表現を見つけました`,
+      lastFindings.length === 0
+        ? 'オンの表現ルールに該当する箇所はありませんでした'
+        : '選ぶと入力欄の該当箇所を確認できます',
+    )
+  }
+}
+
+const applyRuleSettings = (): void => {
+  lastFindings = allFindings.filter((finding) => !disabledRules.has(finding.ruleId))
+  updateRuleCount()
+  if (uiState === 'ready') {
+    updateReadyStatus()
+    renderPreview(textarea.value, lastFindings)
+    renderIssues(lastFindings)
+  }
+  updateCountsAndActions()
+}
+
+for (const rule of aiExpressionRules) {
+  const label = document.createElement('label')
+  label.className = 'rule-option'
+  const input = document.createElement('input')
+  input.type = 'checkbox'
+  input.value = rule.id
+  input.checked = !disabledRules.has(rule.id)
+  const text = document.createElement('span')
+  text.textContent = rule.label
+  label.append(input, text)
+  ruleList.append(label)
+  input.addEventListener('change', () => {
+    if (input.checked) disabledRules.delete(rule.id)
+    else disabledRules.add(rule.id)
+    saveDisabledRules()
+    applyRuleSettings()
+  })
+}
+updateRuleCount()
+
+ruleSearch.addEventListener('input', () => {
+  const query = ruleSearch.value.trim().toLocaleLowerCase('ja')
+  let visible = 0
+  for (const option of ruleList.querySelectorAll<HTMLElement>('.rule-option')) {
+    const matches = option.textContent?.toLocaleLowerCase('ja').includes(query) ?? false
+    option.hidden = !matches
+    if (matches) visible += 1
+  }
+  ruleSearchEmpty.hidden = visible > 0
+})
+
+const setAllRules = (enabled: boolean): void => {
+  disabledRules.clear()
+  if (!enabled) for (const rule of aiExpressionRules) disabledRules.add(rule.id)
+  for (const input of ruleList.querySelectorAll<HTMLInputElement>('input[type="checkbox"]')) {
+    input.checked = enabled
+  }
+  saveDisabledRules()
+  applyRuleSettings()
+}
+enableAllRules.addEventListener('click', () => setAllRules(true))
+disableAllRules.addEventListener('click', () => setAllRules(false))
 
 const setStatus = (state: UiState, title: string, detail: string): void => {
   uiState = state
@@ -132,12 +246,42 @@ const setStatus = (state: UiState, title: string, detail: string): void => {
   }
 }
 
+const selectionTop = (start: number): number => {
+  const style = getComputedStyle(textarea)
+  const mirror = document.createElement('div')
+  mirror.style.position = 'fixed'
+  mirror.style.visibility = 'hidden'
+  mirror.style.pointerEvents = 'none'
+  mirror.style.boxSizing = 'border-box'
+  mirror.style.width = `${textarea.getBoundingClientRect().width}px`
+  mirror.style.padding = style.padding
+  mirror.style.font = style.font
+  mirror.style.lineHeight = style.lineHeight
+  mirror.style.letterSpacing = style.letterSpacing
+  mirror.style.wordSpacing = style.wordSpacing
+  mirror.style.textIndent = style.textIndent
+  mirror.style.textAlign = style.textAlign
+  mirror.style.textTransform = style.textTransform
+  mirror.style.tabSize = style.tabSize
+  mirror.style.direction = style.direction
+  mirror.style.whiteSpace = 'pre-wrap'
+  mirror.style.overflowWrap = 'break-word'
+
+  const marker = document.createElement('span')
+  marker.textContent = '\u200b'
+  mirror.append(document.createTextNode(textarea.value.slice(0, start)), marker)
+  document.body.append(mirror)
+  const top = marker.getBoundingClientRect().top - mirror.getBoundingClientRect().top
+  mirror.remove()
+  return top
+}
+
 const selectRange = (start: number, end: number): void => {
-  textarea.focus()
+  const top = selectionTop(start)
+  textarea.focus({ preventScroll: true })
   textarea.setSelectionRange(start, end)
-  const lineHeight = Number.parseFloat(getComputedStyle(textarea).lineHeight) || 28
-  const linesBefore = textarea.value.slice(0, start).split('\n').length - 1
-  textarea.scrollTop = Math.max(0, linesBefore * lineHeight - textarea.clientHeight / 3)
+  textarea.scrollTop = Math.max(0, top - textarea.clientHeight / 3)
+  textarea.scrollIntoView({ block: 'center', behavior: 'instant' })
 }
 
 type DisplayRange = { start: number; end: number; findings: Finding[] }
@@ -187,9 +331,11 @@ const renderIssues = (findings: readonly Finding[]): void => {
     const empty = document.createElement('div')
     empty.className = 'empty-issues clear-result'
     const message = document.createElement('p')
-    message.textContent = uiState === 'ready'
-      ? '見直したい表現は見つかりませんでした。'
-      : '点検すると、見直したい表現とその理由がここに並びます。'
+    message.textContent = uiState === 'ready' && disabledRules.size === aiExpressionRules.length
+      ? '表現ルールがすべてオフです。点検したい表現をオンにしてください。'
+      : uiState === 'ready'
+        ? '見直したい表現は見つかりませんでした。'
+        : '点検すると、見直したい表現とその理由がここに並びます。'
     empty.append(message)
     issues.append(empty)
     return
@@ -227,6 +373,7 @@ const updateCountsAndActions = (): void => {
 }
 
 const showIdle = (): void => {
+  allFindings = []
   lastFindings = []
   setStatus('idle', '文章を入力してください', '入力後、自動で点検します')
   renderPreview('', [])
@@ -290,20 +437,12 @@ function startWorker(): void {
     }
     if (response.requestId !== requestId) return
 
-    lastFindings = response.findings
+    allFindings = response.findings
     document.documentElement.dataset.analyzeMs = response.metrics.analyzeMs.toFixed(1)
     document.documentElement.dataset.tokenCount = String(response.metrics.tokenCount)
     document.documentElement.dataset.resultId = String(response.requestId)
-    setStatus(
-      'ready',
-      response.findings.length === 0 ? '指摘はありません' : `${response.findings.length}件の表現を見つけました`,
-      response.findings.length === 0
-        ? 'この辞書に該当する表現はありませんでした'
-        : '選ぶと入力欄の該当箇所を確認できます',
-    )
-    renderPreview(textarea.value, lastFindings)
-    renderIssues(lastFindings)
-    updateCountsAndActions()
+    setStatus('ready', '', '')
+    applyRuleSettings()
   })
   worker.addEventListener('error', () => {
     workerReady = false
@@ -318,6 +457,7 @@ function startWorker(): void {
 
 textarea.addEventListener('input', () => {
   requestId += 1
+  allFindings = []
   lastFindings = []
   if (textarea.value.length === 0 && workerReady) {
     showIdle()
@@ -343,6 +483,8 @@ checkButton.addEventListener('click', analyze)
 clearButton.addEventListener('click', () => {
   textarea.value = ''
   requestId += 1
+  allFindings = []
+  lastFindings = []
   if (workerReady) showIdle()
   else {
     setStatus('loading', '辞書を読み込んでいます', '初回のみ少し時間がかかります')
