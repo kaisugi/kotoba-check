@@ -29,12 +29,15 @@ body {
 }
 
 button,
-textarea { font: inherit; }
+textarea,
+input { font: inherit; }
 
 button { color: inherit; }
 
 button:focus-visible,
 textarea:focus-visible,
+input:focus-visible,
+summary:focus-visible,
 a:focus-visible {
   outline: 3px solid rgb(156 64 52 / 24%);
   outline-offset: 2px;
@@ -221,6 +224,91 @@ textarea::placeholder { color: #999; }
 
 .button-primary:hover:not(:disabled) { background: #454a4f; }
 
+.rules-card {
+  margin-top: 16px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.rules-card > summary {
+  min-height: 52px;
+  padding: 12px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.rules-card > summary::marker { color: var(--muted); }
+.rules-card[open] > summary { border-bottom: 1px solid var(--line); }
+.rule-count { margin-left: auto; color: var(--muted); font-size: 13px; font-weight: 400; }
+
+.rules-content { padding: 16px 18px 18px; }
+.rules-content > p { margin: 0 0 15px; color: var(--muted); font-size: 13px; line-height: 1.7; }
+
+.rules-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  font-size: 13px;
+}
+
+.rules-toolbar label { flex: 0 0 auto; }
+.rules-toolbar input {
+  min-width: 0;
+  min-height: 40px;
+  flex: 1 1 auto;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  font-size: 16px;
+}
+
+.rules-actions { display: flex; gap: 6px; }
+.rules-actions button {
+  min-height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--surface-subtle);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.rules-actions button:hover { background: #eee; }
+
+.rule-list {
+  max-height: 280px;
+  padding: 6px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 3px;
+  overflow-y: auto;
+  border: 1px solid var(--line-soft);
+  border-radius: 4px;
+}
+
+.rule-option {
+  min-width: 0;
+  min-height: 42px;
+  padding: 6px 8px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 14px;
+}
+.rule-option:hover { background: var(--surface-subtle); }
+.rule-option[hidden] { display: none; }
+.rule-option input { width: 18px; height: 18px; flex: 0 0 auto; accent-color: var(--accent-dark); }
+.rule-option span { overflow-wrap: anywhere; }
+.rules-content > .rule-search-empty { margin: 12px 0 0; }
+.rule-search-empty[hidden] { display: none; }
+
 .results {
   margin: 28px 0 48px;
 }
@@ -302,6 +390,13 @@ textarea::placeholder { color: #999; }
 
 .result-panel { border-right: 1px solid var(--line); }
 
+.issues-panel {
+  align-self: start;
+  position: sticky;
+  top: 16px;
+  background: var(--surface);
+}
+
 .panel-title-row {
   min-height: 48px;
   padding: 10px 16px;
@@ -375,7 +470,7 @@ h3 {
 
 .issues-list {
   min-height: 340px;
-  max-height: 560px;
+  max-height: calc(100vh - 80px);
   overflow-y: auto;
 }
 
@@ -486,11 +581,20 @@ footer a { color: #666; text-underline-offset: 3px; }
   .actions { display: grid; grid-template-columns: 1fr 1fr; }
   .button-primary { grid-column: 1 / -1; grid-row: 1; min-width: 0; }
 
+  .rules-card > summary { padding: 11px 13px; }
+  .rules-content { padding: 14px 13px; }
+  .rules-toolbar { flex-wrap: wrap; }
+  .rules-toolbar input { flex-basis: calc(100% - 95px); }
+  .rules-actions { width: 100%; }
+  .rules-actions button { flex: 1; }
+  .rule-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
   .results { margin: 22px 0 32px; }
   .result-heading { align-items: flex-start; flex-direction: column; }
   .status { max-width: 100%; }
   .result-grid { grid-template-columns: 1fr; }
   .result-panel { border-right: 0; border-bottom: 1px solid var(--line); }
+  .issues-panel { position: static; }
   .preview { min-height: 240px; padding: 18px 15px; }
   .issues-list,
   .empty-issues { min-height: 220px; }
@@ -512,4 +616,5 @@ footer a { color: #666; text-underline-offset: 3px; }
   .panel-title-row { padding-inline: 13px; }
   .button { padding-inline: 10px; }
   .footer-links { gap: 13px; }
+  .rule-list { grid-template-columns: 1fr; }
 }

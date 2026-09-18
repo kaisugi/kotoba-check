@@ -18,7 +18,7 @@ export const detectAiExpressions = (tokens: readonly Morpheme[]): Finding[] => {
       const last = tokens[index + rule.tokens.length - 1]
       findings.push({
         id: findingId(rule.id, first.start, last.end),
-        ruleId: 'no-ai-words',
+        ruleId: rule.id,
         label: rule.label,
         message: rule.message,
         start: first.start,
@@ -79,4 +79,3 @@ export const detectShortTopicComma = (
 
 export const detectFindings = (tokens: readonly Morpheme[]): Finding[] =>
   detectAiExpressions(tokens)
-
